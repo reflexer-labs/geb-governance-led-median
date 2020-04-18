@@ -40,10 +40,12 @@ contract Median is LibNote {
         _;
     }
 
-    uint128 public val;
+    uint128 private val;
+
     uint32  public age;
-    bytes32 public constant wat = "ethusd"; // You want to change this every deploy
     uint256 public bar = 1;
+
+    bytes32 public constant wat = "ethusd"; // You want to change this every deploy
 
     // Authorized oracles, set by an auth
     mapping (address => uint256) public orcl;
@@ -72,6 +74,12 @@ contract Median is LibNote {
             keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(abi.encodePacked(val_, age_, wat)))),
             v, r, s
         );
+    }
+
+    // ONM compatibility
+    function poke() external returns (uint) {
+        require(val > 0, "Median/invalid-price-feed");
+        return val;
     }
 
     function poke(
