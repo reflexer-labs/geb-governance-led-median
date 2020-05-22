@@ -58,7 +58,7 @@ median=$(seth --to-address "$1" 2>/dev/null) || {
     median=$(dapp create Median)
 
     echo >&2 "Setting bar to ${#accounts[@]}"
-    seth send "$median" 'setBar(uint256)' "$(seth --to-word ${#accounts[@]})"
+    seth send "$median" 'setQuorum(uint256)' "$(seth --to-word ${#accounts[@]})"
     for acc in "${accounts[@]}"; do
         allaccs+=("${acc#0x}")
     done
