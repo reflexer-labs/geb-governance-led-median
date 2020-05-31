@@ -29,7 +29,7 @@ contract Logging {
     }
 }
 
-contract PriceFeedMedianizer is Logging {
+contract GovernanceLedPriceFeedMedianizer is Logging {
     // --- Auth ---
     mapping (address => uint) public authorizedAccounts;
     /**
@@ -50,7 +50,7 @@ contract PriceFeedMedianizer is Logging {
     * @notice Checks whether msg.sender can call an authed function
     **/
     modifier isAuthorized {
-        require(authorizedAccounts[msg.sender] == 1, "PriceFeedMedianizer/account-not-authorized");
+        require(authorizedAccounts[msg.sender] == 1, "GovernanceLedPriceFeedMedianizer/account-not-authorized");
         _;
     }
 
@@ -74,7 +74,7 @@ contract PriceFeedMedianizer is Logging {
     }
 
     function read() external view returns (uint256) {
-        require(medianPrice > 0, "PriceFeedMedianizer/invalid-price-feed");
+        require(medianPrice > 0, "GovernanceLedPriceFeedMedianizer/invalid-price-feed");
         return medianPrice;
     }
 
@@ -91,7 +91,7 @@ contract PriceFeedMedianizer is Logging {
 
     // ONM compatibility
     function updateResult() external returns (uint) {
-        require(medianPrice > 0, "PriceFeedMedianizer/invalid-price-feed");
+        require(medianPrice > 0, "GovernanceLedPriceFeedMedianizer/invalid-price-feed");
         return medianPrice;
     }
 
@@ -99,7 +99,7 @@ contract PriceFeedMedianizer is Logging {
         uint256[] calldata prices_, uint256[] calldata updateTimestamps_,
         uint8[] calldata v, bytes32[] calldata r, bytes32[] calldata s) external
     {
-        require(prices_.length == quorum, "PriceFeedMedianizer/quorum-too-low");
+        require(prices_.length == quorum, "GovernanceLedPriceFeedMedianizer/quorum-too-low");
 
         uint256 bloom = 0;
         uint256 last = 0;
@@ -109,15 +109,15 @@ contract PriceFeedMedianizer is Logging {
             // Validate the prices were signed by an authorized oracle
             address signer = recoverSigner(prices_[i], updateTimestamps_[i], v[i], r[i], s[i]);
             // Check that signer is an oracle
-            require(whitelistedOracles[signer] == 1, "PriceFeedMedianizer/invalid-oracle");
+            require(whitelistedOracles[signer] == 1, "GovernanceLedPriceFeedMedianizer/invalid-oracle");
             // Price feed timestamp greater than last medianizer time
-            require(updateTimestamps_[i] > zzz, "PriceFeedMedianizer/stale-message");
+            require(updateTimestamps_[i] > zzz, "GovernanceLedPriceFeedMedianizer/stale-message");
             // Check for ordered prices
-            require(prices_[i] >= last, "PriceFeedMedianizer/messages-not-in-order");
+            require(prices_[i] >= last, "GovernanceLedPriceFeedMedianizer/messages-not-in-order");
             last = prices_[i];
             // Bloom filter for signer uniqueness
             uint8 sl = uint8(uint256(signer) >> 152);
-            require((bloom >> sl) % 2 == 0, "PriceFeedMedianizer/oracle-already-signed");
+            require((bloom >> sl) % 2 == 0, "GovernanceLedPriceFeedMedianizer/oracle-already-signed");
             bloom += uint256(2) ** sl;
         }
 
@@ -129,9 +129,9 @@ contract PriceFeedMedianizer is Logging {
 
     function addOracles(address[] calldata orcls) external emitLog isAuthorized {
         for (uint i = 0; i < orcls.length; i++) {
-            require(orcls[i] != address(0), "PriceFeedMedianizer/no-oracle-0");
+            require(orcls[i] != address(0), "GovernanceLedPriceFeedMedianizer/no-oracle-0");
             uint8 s = uint8(uint256(orcls[i]) >> 152);
-            require(oracleAddresses[s] == address(0), "PriceFeedMedianizer/signer-already-exists");
+            require(oracleAddresses[s] == address(0), "GovernanceLedPriceFeedMedianizer/signer-already-exists");
             whitelistedOracles[orcls[i]] = 1;
             oracleAddresses[s] = orcls[i];
         }
@@ -145,8 +145,8 @@ contract PriceFeedMedianizer is Logging {
     }
 
     function setQuorum(uint256 quorum_) external emitLog isAuthorized {
-        require(quorum_ > 0, "PriceFeedMedianizer/quorum-is-zero");
-        require(quorum_ % 2 != 0, "PriceFeedMedianizer/quorum-not-odd-number");
+        require(quorum_ > 0, "GovernanceLedPriceFeedMedianizer/quorum-is-zero");
+        require(quorum_ % 2 != 0, "GovernanceLedPriceFeedMedianizer/quorum-not-odd-number");
         quorum = quorum_;
     }
 }

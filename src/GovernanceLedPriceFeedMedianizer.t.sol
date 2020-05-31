@@ -2,10 +2,10 @@ pragma solidity >=0.5.15;
 
 import "ds-test/test.sol";
 
-import "./PriceFeedMedianizer.sol";
+import "./GovernanceLedPriceFeedMedianizer.sol";
 
-contract PriceFeedMedianizerTest is DSTest {
-    PriceFeedMedianizer m;
+contract GovernanceLedPriceFeedMedianizerTest is DSTest {
+    GovernanceLedPriceFeedMedianizer m;
 
     address[] orcls;
     uint256[] prices;
@@ -15,7 +15,7 @@ contract PriceFeedMedianizerTest is DSTest {
     bytes32[] s;
 
     function setUp() public {
-        m = new PriceFeedMedianizer();
+        m = new GovernanceLedPriceFeedMedianizer();
 
         orcls.push(address(0x2d6691a7Ca09FcFC8a069953AD4Ba4De11DbFFd6));
       	orcls.push(address(0xEF7a293Adaec73c5E134040DDAd13a15CEB7231A));
