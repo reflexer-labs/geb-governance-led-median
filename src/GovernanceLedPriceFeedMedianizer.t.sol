@@ -1,4 +1,4 @@
-pragma solidity >=0.5.15;
+pragma solidity >=0.6.7;
 
 import "ds-test/test.sol";
 
@@ -152,19 +152,5 @@ contract GovernanceLedPriceFeedMedianizerTest is DSTest {
         (latestPrice, validPrice) = m.getResultWithValidity();
 
         assertTrue(validPrice);
-    }
-    function test_oracle_network_medianizer_updateResult() public {
-        m.setQuorum(15);
-        m.addOracles(orcls);
-
-        address[] memory f = new address[](2);
-        f[0] = address(this);
-
-        uint256 gas = gasleft();
-        m.updateResult(prices, updateTimestamps, v, r, s);
-
-        uint val = m.updateResult();
-
-        assertEq(val, 258.679 ether);
     }
 }
