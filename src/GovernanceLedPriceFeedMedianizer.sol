@@ -59,7 +59,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
     uint32  public lastUpdateTime;
     uint256 public quorum = 1;
 
-    bytes32 public constant symbol = "ethusd"; // You want to change this every deployment
+    bytes32 public symbol = "ethusd"; // You want to change this every deployment
 
     // Authorized oracles, set by an auth
     mapping (address => uint256) public whitelistedOracles;
@@ -82,7 +82,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
         return (medianPrice, medianPrice > 0);
     }
 
-    function recoverSigner(uint256 price_, uint256 updateTimestamp_, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {
+    function recoverSigner(uint256 price_, uint256 updateTimestamp_, uint8 v, bytes32 r, bytes32 s) virtual internal view returns (address) {
         return ecrecover(
             keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", keccak256(abi.encodePacked(price_, updateTimestamp_, symbol)))),
             v, r, s
