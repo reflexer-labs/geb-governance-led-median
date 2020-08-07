@@ -67,7 +67,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
     // Mapping for at most 256 oracles
     mapping (uint8 => address) public oracleAddresses;
 
-    event LogMedianPrice(uint256 medianPrice, uint256 lastUpdateTime);
+    event UpdateResult(uint256 medianPrice, uint256 lastUpdateTime);
 
     constructor() public {
         authorizedAccounts[msg.sender] = 1;
@@ -118,7 +118,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
         medianPrice    = uint128(prices_[prices_.length >> 1]);
         lastUpdateTime = uint32(block.timestamp);
 
-        emit LogMedianPrice(medianPrice, lastUpdateTime);
+        emit UpdateResult(medianPrice, lastUpdateTime);
     }
 
     function addOracles(address[] calldata orcls) external emitLog isAuthorized {
