@@ -38,6 +38,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
      */
     function addAuthorization(address account) external emitLog isAuthorized {
         authorizedAccounts[account] = 1;
+        emit AddAuthorization(account);
     }
     /**
      * @notice Remove auth from an account
@@ -45,6 +46,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
      */
     function removeAuthorization(address account) external emitLog isAuthorized {
         authorizedAccounts[account] = 0;
+        emit RemoveAuthorization(account);
     }
     /**
     * @notice Checks whether msg.sender can call an authed function
@@ -68,6 +70,11 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
     mapping (uint8 => address) public oracleAddresses;
 
     event UpdateResult(uint256 medianPrice, uint256 lastUpdateTime);
+    event AddOracles(address[] orcls);
+    event RemoveOracles(address[] orcls);
+    event SetQuorum(uint256 quorum);
+    event AddAuthorization(address account);
+    event RemoveAuthorization(address account);
 
     constructor() public {
         authorizedAccounts[msg.sender] = 1;
@@ -129,6 +136,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
             whitelistedOracles[orcls[i]] = 1;
             oracleAddresses[s] = orcls[i];
         }
+        emit AddOracles(orcls);
     }
 
     function removeOracles(address[] calldata orcls) external emitLog isAuthorized {
@@ -136,11 +144,13 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
             whitelistedOracles[orcls[i]] = 0;
             oracleAddresses[uint8(uint256(orcls[i]) >> 152)] = address(0);
        }
+       emit RemoveOracles(orcls);
     }
 
     function setQuorum(uint256 quorum_) external emitLog isAuthorized {
         require(quorum_ > 0, "GovernanceLedPriceFeedMedianizer/quorum-is-zero");
         require(quorum_ % 2 != 0, "GovernanceLedPriceFeedMedianizer/quorum-not-odd-number");
         quorum = quorum_;
+        emit SetQuorum(quorum);
     }
 }
