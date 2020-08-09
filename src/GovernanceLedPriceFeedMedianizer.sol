@@ -78,6 +78,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
 
     constructor() public {
         authorizedAccounts[msg.sender] = 1;
+        emit AddAuthorization(msg.sender);
     }
 
     function read() external view returns (uint256) {
