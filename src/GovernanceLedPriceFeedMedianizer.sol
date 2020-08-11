@@ -1,42 +1,13 @@
 pragma solidity >=0.6.7;
 
-contract Logging {
-    event LogNote(
-        bytes4   indexed  sig,
-        address  indexed  usr,
-        bytes32  indexed  arg1,
-        bytes32  indexed  arg2,
-        bytes             data
-    ) anonymous;
-
-    modifier emitLog {
-        _;
-        assembly {
-            // log an 'anonymous' event with a constant 6 words of calldata
-            // and four indexed topics: selector, caller, arg1 and arg2
-            let mark := mload(0x40)                   // end of memory ensures zero
-            mstore(0x40, add(mark, 288))              // update free memory pointer
-            mstore(mark, 0x20)                        // bytes type data offset
-            mstore(add(mark, 0x20), 224)              // bytes size (padded)
-            calldatacopy(add(mark, 0x40), 0, 224)     // bytes payload
-            log4(mark, 288,                           // calldata
-                 shl(224, shr(224, calldataload(0))), // msg.sig
-                 caller(),                            // msg.sender
-                 calldataload(4),                     // arg1
-                 calldataload(36)                     // arg2
-                )
-        }
-    }
-}
-
-contract GovernanceLedPriceFeedMedianizer is Logging {
+contract GovernanceLedPriceFeedMedianizer {
     // --- Auth ---
     mapping (address => uint) public authorizedAccounts;
     /**
      * @notice Add auth to an account
      * @param account Account to add auth to
      */
-    function addAuthorization(address account) external emitLog isAuthorized {
+    function addAuthorization(address account) external isAuthorized {
         authorizedAccounts[account] = 1;
         emit AddAuthorization(account);
     }
@@ -44,7 +15,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
      * @notice Remove auth from an account
      * @param account Account to remove auth from
      */
-    function removeAuthorization(address account) external emitLog isAuthorized {
+    function removeAuthorization(address account) external isAuthorized {
         authorizedAccounts[account] = 0;
         emit RemoveAuthorization(account);
     }
@@ -129,7 +100,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
         emit UpdateResult(medianPrice, lastUpdateTime);
     }
 
-    function addOracles(address[] calldata orcls) external emitLog isAuthorized {
+    function addOracles(address[] calldata orcls) external isAuthorized {
         for (uint i = 0; i < orcls.length; i++) {
             require(orcls[i] != address(0), "GovernanceLedPriceFeedMedianizer/no-oracle-0");
             uint8 s = uint8(uint256(orcls[i]) >> 152);
@@ -140,7 +111,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
         emit AddOracles(orcls);
     }
 
-    function removeOracles(address[] calldata orcls) external emitLog isAuthorized {
+    function removeOracles(address[] calldata orcls) external isAuthorized {
        for (uint i = 0; i < orcls.length; i++) {
             whitelistedOracles[orcls[i]] = 0;
             oracleAddresses[uint8(uint256(orcls[i]) >> 152)] = address(0);
@@ -148,7 +119,7 @@ contract GovernanceLedPriceFeedMedianizer is Logging {
        emit RemoveOracles(orcls);
     }
 
-    function setQuorum(uint256 quorum_) external emitLog isAuthorized {
+    function setQuorum(uint256 quorum_) external isAuthorized {
         require(quorum_ > 0, "GovernanceLedPriceFeedMedianizer/quorum-is-zero");
         require(quorum_ % 2 != 0, "GovernanceLedPriceFeedMedianizer/quorum-not-odd-number");
         quorum = quorum_;
